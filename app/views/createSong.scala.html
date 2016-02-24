@@ -1,0 +1,34 @@
+@(songForm: Form[Song], musicians: Seq[(String, String)])(implicit messages: Messages, request: RequestHeader)
+
+@import helper._
+
+@implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) } 
+
+@main {
+
+    <h3>Add a song</h3>
+
+    @form(routes.SongController.save()) {
+
+        <fieldset>
+
+            @inputText(songForm("name"), '_label -> "Song name", '_help -> "")
+            @inputDate(songForm("released"), '_label -> "Released date", '_help -> "")
+
+            @select(
+                songForm("musician"), 
+                musicians, 
+                '_label -> "Musician", '_default -> "-- Choose a musician --",
+                '_showConstraints -> false
+            )
+
+        </fieldset>
+
+        <div class="actions">
+            <input type="submit" value="Create this song" class="btn primary"> or 
+            <a href="@routes.SongController.list()" class="btn">Cancel</a> 
+        </div>
+
+    }
+
+}

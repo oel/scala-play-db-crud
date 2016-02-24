@@ -1,0 +1,103 @@
+@(currentPage: Page[(Musician, Option[Country])], currentOrderBy: Int, currentFilter: String)(implicit flash: play.api.mvc.Flash, messages: Messages, request: RequestHeader)
+
+@*************************************
+* Helper generating navigation links *
+**************************************@
+@link(newPage: Int, newOrderBy: Option[Int] = None) = @{
+    routes.MusicianController.list(newPage, newOrderBy.map { orderBy =>
+        if(orderBy == scala.math.abs(currentOrderBy)) -currentOrderBy else orderBy
+    }.getOrElse(currentOrderBy), currentFilter)
+
+}
+
+@**********************************
+* Helper generating table headers *
+***********************************@
+@header(orderBy: Int, title: String) = {
+    <th class="col@orderBy header @if(scala.math.abs(currentOrderBy) == orderBy) @{if(currentOrderBy < 0) "headerSortDown" else "headerSortUp"}">
+        <a href="@link(0, Some(orderBy))">@title</a>
+    </th>
+}
+
+@main {
+
+    <h3>@Messages("musicians.list.title", currentPage.total)</h3>
+
+    @flash.get("success").map { message =>
+        <div class="alert-message warning">
+            <strong>Done!</strong> @message
+        </div>
+    }
+
+    <div id="actions">
+
+        @helper.form(action=routes.MusicianController.list()) {
+            <input type="search" id="searchbox" name="f" value="@currentFilter" placeholder="Filter by musician name...">
+            <input type="submit" id="searchsubmit" value="Filter by name" class="btn primary">
+        }
+
+        <a class="btn success" id="add" href="@routes.MusicianController.create()">Add a new musician</a>
+
+    </div>
+
+    @Option(currentPage.items).filterNot(_.isEmpty).map { musicians =>
+
+        <table class="musicians zebra-striped">
+            <thead>
+                <tr>
+                    @header(2, "Musician name")
+                    @header(3, "Country")
+                </tr>
+            </thead>
+            <tbody>
+
+                @musicians.map { 
+                    case (musician, country) => {
+                        <tr>
+                            <td><a href="@routes.MusicianController.edit(musician.id.get)">@musician.name</a></td>
+                            <td>
+                                @country.map(_.name).getOrElse { <em>-</em> }
+                            </td>
+                        </tr>
+                    }
+                }
+
+            </tbody>
+        </table>
+
+        <div id="pagination" class="pagination">
+            <ul>
+                @currentPage.prev.map { page =>
+                    <li class="prev">
+                        <a href="@link(page)">&larr; Previous</a>
+                    </li> 
+                }.getOrElse {
+                    <li class="prev disabled">
+                        <a>&larr; Previous</a>
+                    </li>
+                }
+                <li class="current">
+                    <a>Displaying @(currentPage.offset + 1) to @(currentPage.offset + musicians.size) of @currentPage.total</a>
+                </li>
+                @currentPage.next.map { page =>
+                    <li class="next">
+                        <a href="@link(page)">Next &rarr;</a>
+                    </li> 
+                }.getOrElse {
+                    <li class="next disabled">
+                        <a>Next &rarr;</a>
+                    </li>
+                }
+            </ul>
+        </div>
+
+    }.getOrElse {
+
+        <div class="well">
+            <em>Nothing to display</em>
+        </div>
+
+    }
+
+}
+

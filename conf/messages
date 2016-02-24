@@ -1,0 +1,4 @@
+# Messages
+
+songs.list.title={0,choice,0#No songs|1#One song|1<{0,number,integer} songs} found
+musicians.list.title={0,choice,0#No musicians|1#One musician|1<{0,number,integer} musicians} found

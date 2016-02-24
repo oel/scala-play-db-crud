@@ -1,0 +1,29 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Default path will just redirect to the song list
+GET     /                       controllers.SongController.index
+
+# Songs/Musicians list (look at the default values for pagination parameters)
+GET     /songs                  controllers.SongController.list(p:Int ?= 0, s:Int ?= 2, f ?= "")
+GET     /musicians              controllers.MusicianController.list(p:Int ?= 0, s:Int ?= 2, f ?= "")
+
+# Add song/musician
+GET     /songs/new              controllers.SongController.create
+GET     /musicians/new          controllers.MusicianController.create
+POST    /songs                  controllers.SongController.save
+POST    /musicians              controllers.MusicianController.save
+
+# Edit existing song/musician
+GET     /songs/:id              controllers.SongController.edit(id:Long)
+GET     /musicians/:id          controllers.MusicianController.edit(id:Long)
+POST    /songs/:id              controllers.SongController.update(id:Long)
+POST    /musicians/:id          controllers.MusicianController.update(id:Long)
+
+# Delete a song/musician
+POST    /songs/:id/delete       controllers.SongController.delete(id:Long)
+POST    /musicians/:id/delete   controllers.MusicianController.delete(id:Long)
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file           controllers.Assets.at(path="/public", file)

@@ -1,0 +1,37 @@
+@(id: Long, musicianForm: Form[Musician], countries : Seq[(String, String)])(implicit messages: Messages, request: RequestHeader)
+
+@import helper._
+
+@implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) }
+
+@main {
+
+    <h3>Edit musician</h3>
+
+    @form(routes.MusicianController.update(id)) {
+
+        <fieldset>
+
+            @inputText(musicianForm("name"), '_label -> "Musician name", '_help -> "")
+
+            @select(
+                musicianForm("country"), 
+                countries, 
+                '_label -> "Country", '_default -> "-- Choose a country --",
+                '_showConstraints -> false
+            )
+
+        </fieldset>
+
+        <div class="actions">
+            <input type="submit" value="Save this musician" class="btn primary"> or 
+            <a href="@routes.MusicianController.list()" class="btn">Cancel</a> 
+        </div>
+
+    }
+
+    @form(routes.MusicianController.delete(id), 'class -> "topRight") {
+        <input type="submit" value="Delete this musician" class="btn danger">
+    }
+
+}

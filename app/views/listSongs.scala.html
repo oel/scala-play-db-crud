@@ -1,0 +1,107 @@
+@(currentPage: Page[(Song, Option[Musician])], currentOrderBy: Int, currentFilter: String)(implicit flash: play.api.mvc.Flash, messages: Messages, request: RequestHeader)
+
+@*************************************
+* Helper generating navigation links *
+**************************************@
+@link(newPage: Int, newOrderBy: Option[Int] = None) = @{
+    routes.SongController.list(newPage, newOrderBy.map { orderBy =>
+        if(orderBy == scala.math.abs(currentOrderBy)) -currentOrderBy else orderBy
+    }.getOrElse(currentOrderBy), currentFilter)
+
+}
+
+@**********************************
+* Helper generating table headers *
+***********************************@
+@header(orderBy: Int, title: String) = {
+    <th class="col@orderBy header @if(scala.math.abs(currentOrderBy) == orderBy) @{if(currentOrderBy < 0) "headerSortDown" else "headerSortUp"}">
+        <a href="@link(0, Some(orderBy))">@title</a>
+    </th>
+}
+
+@main {
+
+    <h3>@Messages("songs.list.title", currentPage.total)</h3>
+
+    @flash.get("success").map { message =>
+        <div class="alert-message warning">
+            <strong>Done!</strong> @message
+        </div>
+    }
+
+    <div id="actions">
+
+        @helper.form(action=routes.SongController.list()) {
+            <input type="search" id="searchbox" name="f" value="@currentFilter" placeholder="Filter by song name...">
+            <input type="submit" id="searchsubmit" value="Filter by name" class="btn primary">
+        }
+
+        <a class="btn success" id="add" href="@routes.SongController.create()">Add a new song</a>
+
+    </div>
+
+    @Option(currentPage.items).filterNot(_.isEmpty).map { songs =>
+
+        <table class="songs zebra-striped">
+            <thead>
+                <tr>
+                    @header(2, "Song name")
+                    @header(3, "Released")
+                    @header(4, "Musician")
+                </tr>
+            </thead>
+            <tbody>
+
+                @songs.map { 
+                    case (song, musician) => {
+                        <tr>
+                            <td><a href="@routes.SongController.edit(song.id.get)">@song.name</a></td>
+                            <td>
+                                @song.released.map(_.format("dd MMM yyyy")).getOrElse { <em>-</em> }
+                            </td>
+                            <td>
+                                @musician.map(_.name).getOrElse { <em>-</em> }
+                            </td>
+                        </tr>
+                    }
+                }
+
+            </tbody>
+        </table>
+
+        <div id="pagination" class="pagination">
+            <ul>
+                @currentPage.prev.map { page =>
+                    <li class="prev">
+                        <a href="@link(page)">&larr; Previous</a>
+                    </li> 
+                }.getOrElse {
+                    <li class="prev disabled">
+                        <a>&larr; Previous</a>
+                    </li>
+                }
+                <li class="current">
+                    <a>Displaying @(currentPage.offset + 1) to @(currentPage.offset + songs.size) of @currentPage.total</a>
+                </li>
+                @currentPage.next.map { page =>
+                    <li class="next">
+                        <a href="@link(page)">Next &rarr;</a>
+                    </li> 
+                }.getOrElse {
+                    <li class="next disabled">
+                        <a>Next &rarr;</a>
+                    </li>
+                }
+            </ul>
+        </div>
+
+    }.getOrElse {
+
+        <div class="well">
+            <em>Nothing to display</em>
+        </div>
+
+    }
+
+}
+
